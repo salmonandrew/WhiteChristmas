@@ -35,13 +35,48 @@ def detectFace(img):
         cords = (xValues[0], yValues[0], xValues[1], yValues[2])
         return cords
 
+
 def calcSize(cords):
     width = cords[2] - cords[0]
     height = cords[3] - cords[1]
     return (width, height)
+
 
 def getImagePath(name):
     return os.path.join(
         os.path.dirname(__file__),
         'images/{}'.format(name))
 
+
+def getLabels(img):
+    with io.open(img, 'rb') as image_file:
+        content = image_file.read()
+
+    image = vision.types.Image(content=content)
+
+    response = client.label_detection(image=image)
+    labels = response.label_annotations
+    print('Labels:')
+
+    descriptions = list()
+
+    for label in labels:
+        descriptions.append(label.description)
+
+    return descriptions
+
+
+def detectObjects(path):
+    with open(path, 'rb') as image_file:
+        content = image_file.read()
+    image = vision.types.Image(content=content)
+
+    objects = client.object_localization(
+        image=image).localized_object_annotations
+
+    print('Number of objects found: {}'.format(len(objects)))
+    for object_ in objects:
+        print('\n{} (confidence: {})'.format(object_.name, object_.score))
+        print('Normalized bounding polygon vertices: ')
+        for vertex in object_.bounding_poly.normalized_vertices:
+            print(' - ({}, {})'.format(vertex.x, vertex.y))
