@@ -1,5 +1,6 @@
 import io
 import os
+import BingSearch
 
 from PIL import Image
 # Imports the Google Cloud client library
@@ -65,13 +66,15 @@ for face in faces:
 
 overlay = os.path.join(
     os.path.dirname(__file__),
-    'images/apple.jpeg')
+    'images/bing.jpg')
 
 image1 = Image.open(file_name)
 image2 = Image.open(overlay)
 
 image2 = image2.resize(size)
 
-image1.paste(image2, (xValues[0],yValues[0]))
+image1.paste(image2, (xValues[0], yValues[0]))
 
 image1.show()
+
+BingSearch.GetImage('balloon')
