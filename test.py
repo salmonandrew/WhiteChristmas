@@ -1,8 +1,11 @@
 from PIL import Image
 import helpers
 
-path = helpers.getImagePath('apple.jpeg')
+path1 = helpers.getImagePath("angry.jpg")
+image = helpers.getImagePath("face.jpg")
+# image.save('images/test.jpg')
 
-image = helpers.CropFace(helpers.getImagePath('face.jpg'))
+helpers.objOnFace(path1, helpers.getImagePath('bing.jpg')).show()
 
-helpers.localize_objects(path)
+
+

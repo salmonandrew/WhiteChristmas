@@ -25,6 +25,9 @@ def detectFace(img):
     image = types.Image(content=content)
     response = client.face_detection(image=image)
     faces = response.face_annotations
+    if len(faces)==0:
+        return False
+
     for face in faces:
         xValues = []
         yValues = []
@@ -35,6 +38,42 @@ def detectFace(img):
         cords = (xValues[0], yValues[0], xValues[1], yValues[2])
         return cords
 
+
+def faceOnFace(img1, img2):
+#     with io.open(img1, 'rb') as image_file1:
+#         content1 = image_file1.read()
+#
+#
+#     with io.open(img2,'rb') as image_file2:
+#         content2 = image_file2.read()
+
+    if detectFace(img1) != False:
+        cords = detectFace(img1)
+        image2 = Image.open(img2)
+        image2 = image2.resize(calcSize(cords))
+        image1 = Image.open(img1)
+        image1.paste(image2, (cords[0],cords[1]))
+        return image1
+    else:
+        return False
+
+def objOnFace(img1, img2):
+    with io.open(img1, 'rb') as image_file1:
+        content1 = image_file1.read()
+
+
+    with io.open(img2,'rb') as image_file2:
+         content2 = image_file2.read()
+
+    if detectFace(img1) != False:
+        cords = detectFace(img1)
+        image2 = Image.open(img2)
+        image2 = image2.resize(calcSize(cords))
+        image1 = Image.open(img1)
+        image1.paste(image2, (cords[0], cords[1]))
+        return image1
+    else:
+        return False
 
 def calcSize(cords):
     width = cords[2] - cords[0]
