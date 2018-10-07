@@ -8,13 +8,17 @@ from google.cloud import vision
 from google.cloud.vision import types
 from google.oauth2 import service_account
 
+#from rapidconnect import RapidConnect
+# rapid = RapidConnect('hacknc2018_5bb9ad5ee4b02d6cfa6a8805', '/connect/auth/hacknc2018_5bb9ad5ee4b02d6cfa6a8805')
+
+
 creds = service_account.Credentials.from_service_account_file('/Users/andrewhirasawa/HackNC2018-a7ec909b5efa.json')
 client = vision.ImageAnnotatorClient(credentials=creds)
 
-def CropFace(img):
+def cropFace(img):
     cords = detectFace(img)
     image = Image.open(img)
-    image = image.crop(cords)
+    image = image.crop(cords[0])
     return image
 
 def detectFace(img):
@@ -28,6 +32,7 @@ def detectFace(img):
     if len(faces)==0:
         return False
 
+    cords = list()
     for face in faces:
         xValues = []
         yValues = []
@@ -35,8 +40,8 @@ def detectFace(img):
             xValues.append((vertex.x))
             yValues.append((vertex.y))
 
-        cords = (xValues[0], yValues[0], xValues[1], yValues[2])
-        return cords
+        cords.append((xValues[0], yValues[0], xValues[1], yValues[2]))
+    return cords
 
 
 def faceOnFace(img1, img2):
@@ -49,6 +54,7 @@ def faceOnFace(img1, img2):
 
     if detectFace(img1) != False:
         cords = detectFace(img1)
+        cords = cords[0]
         image2 = Image.open(img2)
         image2 = image2.resize(calcSize(cords))
         image1 = Image.open(img1)
@@ -58,19 +64,21 @@ def faceOnFace(img1, img2):
         return False
 
 def objOnFace(img1, img2):
-    with io.open(img1, 'rb') as image_file1:
-        content1 = image_file1.read()
+    # with io.open(img1, 'rb') as image_file1:
+    #     content1 = image_file1.read()
 
 
-    with io.open(img2,'rb') as image_file2:
-         content2 = image_file2.read()
+    #with io.open(img2,'rb') as image_file2:
+    #     content2 = image_file2.read()
 
     if detectFace(img1) != False:
         cords = detectFace(img1)
         image2 = Image.open(img2)
-        image2 = image2.resize(calcSize(cords))
         image1 = Image.open(img1)
-        image1.paste(image2, (cords[0], cords[1]))
+        print(len(cords))
+        for i in range(len(cords)):
+            image2 = image2.resize(calcSize(cords[i]))
+            image1.paste(image2, (cords[i][0], cords[i][1]))
         return image1
     else:
         return False
@@ -115,7 +123,13 @@ def detectObjects(path):
 
     print('Number of objects found: {}'.format(len(objects)))
     for object_ in objects:
-        print('\n{} (confidence: {})'.format(object_.name, object_.score))
-        print('Normalized bounding polygon vertices: ')
+        print('{}'.format(object_.name))
         for vertex in object_.bounding_poly.normalized_vertices:
             print(' - ({}, {})'.format(vertex.x, vertex.y))
+
+
+# def synonyms(word):
+#     result = rapid.call('WordsAPI', 'Synonyms', {
+#         'word': 'dog',
+#     })
+#     print(result)
